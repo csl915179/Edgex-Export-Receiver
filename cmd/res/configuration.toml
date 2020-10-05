@@ -1,0 +1,16 @@
+[Service]
+Host = "localhost"
+Port = 1210
+Labels = []
+OpenMsg = "Edgex-Export-Receiver started"
+
+#Using an default memory db automatically if not configed here.
+[Database]
+Host = "localhost"
+Name = "edgex-export-receiver"
+Port = 27017
+Username = "su"
+Password = "su"
+  [Database.Scheme]
+  Task = "task"
+  Node = "node"
