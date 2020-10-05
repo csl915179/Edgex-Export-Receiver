@@ -1,4 +1,4 @@
-package db
+package Mongo
 
 
 import (
@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	"Web_Receiver/config"
+	"Edgex-Export_Receiver/config"
 	mgo "gopkg.in/mgo.v2"
 )
 
@@ -17,9 +17,7 @@ var (
 	dbPort        int64
 	dbUserName    string
 	dbPassword    string
-	gatewayScheme string
-	userScheme    string
-	applicationScheme string
+	eventScheme string
 	taskScheme string
 	nodeScheme string
 )
@@ -40,10 +38,11 @@ func loadConf() {
 	dbPort = config.DBConf.Port//27017
 	dbUserName = config.DBConf.Username//su
 	dbPassword = config.DBConf.Password//su
+	eventScheme = config.DBConf.Scheme.Event
 	taskScheme = config.DBConf.Scheme.Task
 	nodeScheme = config.DBConf.Scheme.Node
-	log.Println(fmt.Sprintf("mongoDB connection info %s in %s:%d with credential (%s / %x), with scheme: %s, %s.",
-		database, dbHost, dbPort, dbUserName, md5.Sum([]byte(dbPassword)), taskScheme,nodeScheme))
+	log.Println(fmt.Sprintf("mongoDB connection info %s in %s:%d with credential (%s / %x), with scheme: %s %s, %s.",
+		database, dbHost, dbPort, dbUserName, md5.Sum([]byte(dbPassword)), taskScheme, nodeScheme, eventScheme))
 }
 
 func DBConnect() bool {

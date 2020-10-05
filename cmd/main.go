@@ -1,9 +1,9 @@
 package main
 
 import (
-	"Web_Receiver/Controller"
-	"Web_Receiver/config"
-	"Web_Receiver/db"
+	"Edgex-Export_Receiver/Controller"
+	"Edgex-Export_Receiver/config"
+	"Edgex-Export_Receiver/db/Mongo"
 	"log"
 	"net/http"
 	"strconv"
@@ -21,7 +21,7 @@ func main() {
 		return
 	}
 
-	ok := db.DBConnect()
+	ok := Mongo.DBConnect()
 	if !ok {
 		log.Println("Mongo Connection Failed")
 	}
@@ -33,7 +33,7 @@ func main() {
 		ReadTimeout:  15 * time.Second,
 	}
 
-	log.Println("EdgeX UI Server Listen At " + server.Addr)
+	log.Println("Edgex-Export-Receiver Listen At " + server.Addr)
 	log.Fatal(server.ListenAndServe())
 }
 

@@ -14,3 +14,4 @@ Password = "su"
   [Database.Scheme]
   Task = "task"
   Node = "node"
+  Event = "event"

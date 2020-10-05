@@ -1,4 +1,4 @@
-module Web_Receiver
+module Edgex-Export_Receiver
 
 go 1.13
 

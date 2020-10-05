@@ -1,7 +1,7 @@
 package Controller
 
 import (
-	"Web_Receiver/EdgexData"
+	"Edgex-Export_Receiver/EdgexData"
 	mux "github.com/gorilla/mux"
 	"net/http"
 )

@@ -33,6 +33,7 @@ type Service struct {
 type Scheme struct {
 	Task string
 	Node string
+	Event string
 }
 
 type Database struct {
