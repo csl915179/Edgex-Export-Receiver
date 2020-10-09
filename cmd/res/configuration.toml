@@ -12,6 +12,9 @@ Port = 27017
 Username = "su"
 Password = "su"
   [Database.Scheme]
-  Task = "task"
-  Node = "node"
   Event = "event"
+  Application = "application"
+  Node = "node"
+  TaskEvent = "taskevent"
+  Device = "device"
+  Command = "command"

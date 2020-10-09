@@ -1,9 +1,9 @@
 package main
 
 import (
-	"Edgex-Export_Receiver/Controller"
-	"Edgex-Export_Receiver/config"
-	"Edgex-Export_Receiver/db/Mongo"
+	"Edgex-Export_Receiver/app/Controller"
+	"Edgex-Export_Receiver/app/config"
+	"Edgex-Export_Receiver/app/db/Mongo"
 	"log"
 	"net/http"
 	"strconv"
