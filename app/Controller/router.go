@@ -29,7 +29,7 @@ func InitRestRoutes() http.Handler {
 	//删除Device
 	s.HandleFunc("/device", EdgexData.DeleteDevice).Methods(http.MethodDelete)
 	//按EdgexID删除Device
-	s.HandleFunc("/deviceedgexid/{edgexid}", EdgexData.DeleteDeviceByEdgexId).Methods(http.MethodDelete)
+	s.HandleFunc("/device/edgexid/{edgexid}", EdgexData.DeleteDeviceByEdgexId).Methods(http.MethodDelete)
 	//整理僵尸Device并列出结果
 	s.HandleFunc("/device/check", EdgexData.CheckDeviceExist).Methods(http.MethodPost)
 
