@@ -10,16 +10,16 @@ type CommandMongoRepository struct {
 }
 
 
-func (ar *CommandMongoRepository) Insert(Command *domain.Command) (string, error) {
+func (ar *CommandMongoRepository) Insert(command *domain.Command) (string, error) {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(commandScheme)
-	err := coll.Insert(Command)
+	err := coll.Insert(command)
 	if err != nil {
 		log.Println("Insert Command failed !")
 		return "", err
 	}
-	return Command.Id.Hex(), nil
+	return command.Id.Hex(), nil
 }
 
 func (ar *CommandMongoRepository) Select(id string) (domain.Command, error){
@@ -29,7 +29,20 @@ func (ar *CommandMongoRepository) Select(id string) (domain.Command, error){
 	result := domain.Command{}
 	err := coll.Find(bson.M{"_id": bson.ObjectIdHex(id)}).One(&result)
 	if err != nil {
-		log.Println("Insert event failed !")
+		log.Println("Select event failed !")
+		return result, err
+	}
+	return result, nil
+}
+
+func (ar *CommandMongoRepository) SelectByDeviceID(deviceID string) (domain.Command, error) {
+	ds := DS.DataStore()
+	defer ds.S.Close()
+	coll := ds.S.DB(database).C(commandScheme)
+	result := domain.Command{}
+	err := coll.Find(bson.M{"deviceid": deviceID}).One(&result)
+	if err != nil {
+		log.Println("Select event failed !")
 		return result, err
 	}
 	return result, nil
@@ -49,23 +62,25 @@ func (ar *CommandMongoRepository) SelectAll() ([]domain.Command, error){
 	return result, nil
 }
 
-func (ar *CommandMongoRepository) Update(Command *domain.Command) (domain.Command, error){
+func (ar *CommandMongoRepository) Update(command *domain.Command) (domain.Command, error){
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(commandScheme)
-	err := coll.UpdateId(Command.Id, &Command)
+	err := coll.UpdateId(command.Id, &command)
 	if err != nil {
 		log.Println("Update Command failed !" + err.Error())
-		return *Command, err
+		return *command, err
 	}
-	return *Command, nil
+	return *command, nil
 }
 
 func (ar *CommandMongoRepository) Delete(id string) error {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(commandScheme)
-	err := coll.Remove(bson.M{"_id": bson.ObjectIdHex(id)})
+	command := domain.Command{}
+	err := coll.Find(bson.M{"_id": bson.ObjectIdHex(id)}).One(&command)
+	err = coll.Remove(bson.M{"_id": bson.ObjectIdHex(id)})
 	if err != nil {
 		log.Println("Delete Command failed !")
 		return err

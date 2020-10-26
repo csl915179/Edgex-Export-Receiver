@@ -81,7 +81,7 @@ func DeleteCommand(w http.ResponseWriter, r *http.Request) {
 	err := db.GetCommandRepos().Delete(id)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, "err.Error()", http.StatusServiceUnavailable)
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	w.Write([]byte("OK"))

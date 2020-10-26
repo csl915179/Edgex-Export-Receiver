@@ -32,6 +32,7 @@ func AddDevice(w http.ResponseWriter, r *http.Request) {
 
 	var Device domain.Device
 	if err := json.NewDecoder(r.Body).Decode(&Device); err != nil {
+		log.Println("Decode Error", err)
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
@@ -79,7 +80,7 @@ func DeleteDevice (w http.ResponseWriter, r *http.Request) {
 	err := db.GetDeviceRepos().Delete(id)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, "err.Error()", http.StatusServiceUnavailable)
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	w.Write([]byte("OK"))
@@ -94,7 +95,7 @@ func DeleteDeviceByEdgexId (w http.ResponseWriter, r *http.Request) {
 	err := db.GetDeviceRepos().DeleteByEdgexId(edgexid)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, "err.Error()", http.StatusServiceUnavailable)
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	w.Write([]byte("OK"))
@@ -110,7 +111,7 @@ func FindDeviceByName (w http.ResponseWriter, r *http.Request) {
 	device,err := db.GetDeviceRepos().SelectByName(name)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, "err.Error()", http.StatusServiceUnavailable)
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	result, _ := json.Marshal(&device)
@@ -127,7 +128,7 @@ func FindDeviceByEdgexId (w http.ResponseWriter, r *http.Request) {
 	device,err := db.GetDeviceRepos().SelectByEdgexId(edgexid)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, "err.Error()", http.StatusServiceUnavailable)
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 	result, _ := json.Marshal(&device)

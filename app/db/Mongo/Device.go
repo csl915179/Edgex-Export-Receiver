@@ -10,6 +10,7 @@ import (
 type DeviceMongoRepository struct {
 }
 
+//查找所有device
 func (ar *DeviceMongoRepository) SelectAll() ([]domain.Device, error){
 	ds := DS.DataStore()
 	defer ds.S.Close()
@@ -22,7 +23,7 @@ func (ar *DeviceMongoRepository) SelectAll() ([]domain.Device, error){
 	}
 	return result, err
 }
-
+//按ID查找Device
 func (ar *DeviceMongoRepository) Select(id string) (domain.Device, error){
 	ds := DS.DataStore()
 	defer ds.S.Close()
@@ -35,7 +36,7 @@ func (ar *DeviceMongoRepository) Select(id string) (domain.Device, error){
 	}
 	return result, nil
 }
-
+//按名查找Device
 func (ar *DeviceMongoRepository) SelectByName(name string) (domain.Device, error){
 	ds := DS.DataStore()
 	defer ds.S.Close()
@@ -48,7 +49,6 @@ func (ar *DeviceMongoRepository) SelectByName(name string) (domain.Device, error
 	}
 	return result, nil
 }
-
 //按EdgexID查找Device
 func (ar *DeviceMongoRepository) SelectByEdgexId(edgexId string) (domain.Device, error){
 	ds := DS.DataStore()
@@ -70,16 +70,30 @@ func (ar *DeviceMongoRepository) Insert(device *domain.Device) (string, error){
 	if device.Id == ""{
 		device.Id = bson.NewObjectId()
 	}
+	//查找有无重名设备
 	count,_ := coll.Find(bson.M{"name": device.Name}).Count()
 	if count>0 {
 		err := errors.New("duplicate device")
-		log.Println("Insert Device failed !" + err.Error())
+		log.Println("Find Device failed !" + err.Error())
 		return "", err
 	}
+	//写入设备
 	err := coll.Insert(device)
 	if err != nil {
 		log.Println("Insert Device failed !" + err.Error())
 		return "", err
+	}
+	//同时写入所有Command
+	coll = ds.S.DB(database).C(commandScheme)
+	for _,command := range(device.GetCommands)  {
+		command.DeviceId = device.Id.Hex()
+		command.Id = bson.NewObjectId()
+		coll.Insert(command)
+	}
+	for _,command  := range(device.PutCommands)  {
+		command.DeviceId = device.Id.Hex()
+		command.Id = bson.NewObjectId()
+		coll.Insert(command)
 	}
 	return device.Id.Hex(), nil
 }
@@ -108,12 +122,20 @@ func (ar *DeviceMongoRepository) Update(device *domain.Device) (domain.Device, e
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(deviceScheme)
-
 	err := coll.UpdateId(device.Id, &device)
 	if err != nil {
 		log.Println("Insert Device failed !" + err.Error())
 		return *device, err
 	}
+	//同时更新相应所有的command
+	coll = ds.S.DB(database).C(commandScheme)
+	for _,command := range device.GetCommands{
+		coll.UpdateId(command.Id, command);
+	}
+	for _,command := range device.PutCommands{
+		coll.UpdateId(command.Id, command);
+	}
+
 	return *device, nil
 }
 
