@@ -1,6 +1,7 @@
 package EdgexData
 
 import (
+	"Edgex-Export_Receiver/app/TaskSchedule"
 	"Edgex-Export_Receiver/app/db"
 	"Edgex-Export_Receiver/app/domain"
 	"encoding/json"
@@ -23,17 +24,19 @@ func Receive(w http.ResponseWriter, r *http.Request) {
 	}
 
 	eventElement := domain.Event{Event:event}
+	eventElement.Size = 0
+	for i := 0; i < len(event.Readings); i++  {
+		eventElement.Size += int64(len(event.Readings[i].Value))
+	}
 	if _,err := db.GetEventRepos().Insert(&eventElement); err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	eventbody,_ := json.Marshal(event)
-	log.Println(string(eventbody))
 }
 
 
-//从mongo里抽出所有的event并返回
+//从mongo里抽出所有的event,存入待执行列表并返回
 func Pull(w http.ResponseWriter, r *http.Request){
 	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
@@ -45,4 +48,9 @@ func Pull(w http.ResponseWriter, r *http.Request){
 	}
 	result, _ := json.Marshal(eventlist)
 	w.Write(result)
+	err = db.GetEventToExecuteRepos().InsertIntoToExecute(eventlist)
+	if err != nil {
+		log.Println(err.Error())
+	}
+	go TaskSchedule.ReceiveTaskScheduleResult();
 }

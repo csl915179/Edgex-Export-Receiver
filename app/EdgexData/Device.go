@@ -36,7 +36,7 @@ func AddDevice(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	if Device.Id == ""{
+	if Device.Id.Hex() == ""{
 		Device.Id = bson.NewObjectId()
 	}
 

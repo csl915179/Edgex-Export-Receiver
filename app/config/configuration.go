@@ -15,11 +15,13 @@ const (
 var (
 	ServerConf   Service
 	DBConf       Database
+	ScheduleConf Schedule
 )
 
 type config struct {
-	Server Service      `toml:"Service"`
-	DB     Database     `toml:"Database"`
+	Server 		Service      `toml:"Service"`
+	DB     		Database     `toml:"Database"`
+	Schedule	Schedule	 `toml:"Schedule"`
 }
 
 type Service struct {
@@ -36,7 +38,9 @@ type Scheme struct {
 	Node string
 	TaskEvent string
 	Device string
-	Command string
+	ScheduleResult string
+	EventToExecute string
+	EventExecuted string
 }
 
 type Database struct {
@@ -48,6 +52,11 @@ type Database struct {
 	Timeout  int64
 	Type     string
 	Scheme   Scheme
+}
+type Schedule struct {
+	Host		string
+	Port		int64
+	GetSchedule	string
 }
 
 
@@ -69,5 +78,6 @@ func LoadConfig(confFilePath string) error {
 	}
 	ServerConf = conf.Server
 	DBConf = conf.DB
+	ScheduleConf = conf.Schedule
 	return nil
 }

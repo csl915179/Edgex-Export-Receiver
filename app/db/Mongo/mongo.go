@@ -20,9 +20,12 @@ var (
 	eventScheme string
 	applicationScheme string
 	nodeScheme string
-	taskEventScheme string
+	taskeventScheme string
 	deviceScheme string
 	commandScheme string
+	scheduleResultScheme string
+	eventtoexecuteScheme string
+	eventexecutedSchene string
 )
 
 type DataStore struct {
@@ -44,11 +47,14 @@ func loadConf() {
 	eventScheme = config.DBConf.Scheme.Event
 	applicationScheme = config.DBConf.Scheme.Application
 	nodeScheme = config.DBConf.Scheme.Node
-	taskEventScheme = config.DBConf.Scheme.TaskEvent
+	taskeventScheme = config.DBConf.Scheme.TaskEvent
 	deviceScheme = config.DBConf.Scheme.Device
-	commandScheme = config.DBConf.Scheme.Command
-	log.Println(fmt.Sprintf("mongoDB connection info %s in %s:%d with credential (%s / %x), with scheme: %s %s %s %s %s %s.",
-		database, dbHost, dbPort, dbUserName, md5.Sum([]byte(dbPassword)), eventScheme, nodeScheme, applicationScheme, taskEventScheme, commandScheme, deviceScheme))
+	scheduleResultScheme = config.DBConf.Scheme.ScheduleResult
+	eventtoexecuteScheme = config.DBConf.Scheme.EventToExecute
+	eventexecutedSchene = config.DBConf.Scheme.EventExecuted
+	log.Println(fmt.Sprintf("mongoDB connection info %s in %s:%d with credential (%s / %x), with scheme: %s %s %s %s %s %s %s %s.",
+		database, dbHost, dbPort, dbUserName, md5.Sum([]byte(dbPassword)), eventScheme, nodeScheme, applicationScheme, taskeventScheme, deviceScheme,
+		scheduleResultScheme, eventtoexecuteScheme, eventexecutedSchene))
 }
 
 func DBConnect() bool {

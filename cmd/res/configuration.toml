@@ -17,4 +17,12 @@ Password = "su"
   Node = "node"
   TaskEvent = "taskevent"
   Device = "device"
-  Command = "command"
+  ScheduleResult = "scheduleresult"
+  EventToExecute = "eventtoexecute"
+  EventExecuted = "eventexecuted"
+
+#接收调度结果
+[Schedule]
+Host = "10.103.240.39"
+Port = 8888
+getSchedule = "getSchedule"

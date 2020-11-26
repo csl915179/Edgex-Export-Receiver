@@ -1,6 +1,7 @@
 package Controller
 
 import (
+	"Edgex-Export_Receiver/app/ApplicationAndTask"
 	"Edgex-Export_Receiver/app/EdgexData"
 	mux "github.com/gorilla/mux"
 	"net/http"
@@ -33,15 +34,18 @@ func InitRestRoutes() http.Handler {
 	//整理僵尸Device并列出结果
 	s.HandleFunc("/device/check", EdgexData.CheckDeviceExist).Methods(http.MethodPost)
 
+	//Application相关
+	s.HandleFunc("/application", ApplicationAndTask.ListAllApplication).Methods(http.MethodGet)
+	s.HandleFunc("/application/{id}", ApplicationAndTask.FindApplicationByID).Methods(http.MethodGet)
+	s.HandleFunc("/application/{id}", ApplicationAndTask.DeleteApplicationByID).Methods(http.MethodDelete)
+	s.HandleFunc("/application", ApplicationAndTask.AddApplication).Methods(http.MethodPost)
+	s.HandleFunc("/application", ApplicationAndTask.EditApplication).Methods(http.MethodPut)
 
-	//Command相关
-	//查找所有Command用get
-	s.HandleFunc("/command", EdgexData.ListAllCommand).Methods(http.MethodGet)
-	//新建某个Command用post，修改用put
-	s.HandleFunc("/command", EdgexData.AddCommand).Methods(http.MethodPost)
-	s.HandleFunc("/command", EdgexData.EditCommand).Methods(http.MethodPut)
-	//删除某个Command
-	s.HandleFunc("/command/{id}", EdgexData.DeleteCommand).Methods(http.MethodDelete)
+	//Event相关
+	//查询最近的几条被发去调度的Event
+	s.HandleFunc("/event/event/{number}", ApplicationAndTask.FindEventByNumber).Methods(http.MethodGet)
+	s.HandleFunc("/event/eventtoexecute/{number}", ApplicationAndTask.FindEventToExecuteByNumber).Methods(http.MethodGet)
+	s.HandleFunc("/event/eventexecuted/{number}", ApplicationAndTask.FindEventExecutedByNumber).Methods(http.MethodGet)
 
 	return r
 }

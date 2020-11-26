@@ -9,6 +9,18 @@ import (
 type EventMongoRepository struct {
 }
 
+func (ar *EventMongoRepository) SelectNumber(number int64) ([]domain.Event, error) {
+	ds := DS.DataStore()
+	defer ds.S.Close()
+	coll := ds.S.DB(database).C(eventScheme)
+	result := make([]domain.Event, 0)
+	err := coll.Find(nil).Sort().All(&result)
+	if err != nil {
+		log.Println("Find Event failed !" + err.Error())
+		return result, err
+	}
+	return result, err
+}
 
 func (ar *EventMongoRepository) Select(id string) (domain.Event, error){
 	ds := DS.DataStore()
@@ -17,10 +29,9 @@ func (ar *EventMongoRepository) Select(id string) (domain.Event, error){
 	result := domain.Event{}
 	err := coll.Find(bson.M{"_id": bson.ObjectIdHex(id)}).One(&result)
 	if err != nil {
-		log.Println("Insert event failed !")
+		//log.Println("Select event failed !", err.Error())
 		return result, err
 	}
-
 	return result, nil
 }
 
