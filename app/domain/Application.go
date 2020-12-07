@@ -8,5 +8,16 @@ type Application struct {
 	Name        	string        						`json:"name"`
 	Frequency		int64								`json:"frequency"`
 	Description 	string        						`json:"desc"`
-	Tasks			map[string]map[string]Command		`json:"tasks"`
+	DeviceTasks		map[string]DeviceTask				`json:"devicetasks"`
+}
+
+type DeviceTask struct {
+	DeviceName		string								`json:"device_name"`
+	DeviceId		string								`json:"device_id"`
+	Tasks			map[string]Task						`json:"tasks"`
+}
+
+type Task struct {
+	Name		string									`json:"name"`
+	Command		Command									`json:"command"`
 }

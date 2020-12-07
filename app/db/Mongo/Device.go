@@ -70,6 +70,13 @@ func (ar *DeviceMongoRepository) Insert(device *domain.Device) (string, error){
 	if device.Id.Hex() == ""{
 		device.Id = bson.NewObjectId()
 	}
+	for name,command := range device.GetCommands {
+		device.GetCommands[name].Size = command.MemoryRequest
+	}
+	for name,command := range device.PutCommands {
+		device.PutCommands[name].Size = command.MemoryRequest
+	}
+
 	//查找有无重名设备
 	count,_ := coll.Find(bson.M{"name": device.Name}).Count()
 	if count>0 {

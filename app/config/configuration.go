@@ -53,10 +53,14 @@ type Database struct {
 	Type     string
 	Scheme   Scheme
 }
-type Schedule struct {
+type Scheduleelement struct {
 	Host		string
 	Port		int64
-	GetSchedule	string
+	Path		string
+}
+type Schedule struct {
+	GetSchedule Scheduleelement
+	AppSchedule Scheduleelement
 }
 
 

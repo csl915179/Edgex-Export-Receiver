@@ -4,7 +4,6 @@ import (
 	"Edgex-Export_Receiver/app/domain"
 	"gopkg.in/mgo.v2/bson"
 	"log"
-	"time"
 )
 
 type EventToExecuteMongoRepository struct {
@@ -16,7 +15,7 @@ func (ar *EventToExecuteMongoRepository) InsertIntoToExecute (eventList []domain
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(eventtoexecuteScheme)
 	for i:=0; i<len(eventList); i++ {
-		eventList[i].ScheduleTime = time.Now().Format("2006-01-02T15:04:05")
+		//eventList[i].ScheduleTime = time.Now().Format("2006-01-02T15:04:05")
 		err := coll.Insert(eventList[i])
 		if err != nil {
 			log.Println("Insert event into EventToExecuteCollection Failed! ", err.Error())
@@ -78,7 +77,7 @@ func (ar *EventToExecuteMongoRepository) SelectNumber(number int64) ([]domain.Ev
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(eventtoexecuteScheme)
 	result := make([]domain.Event, 0)
-	err := coll.Find(nil).Sort("-schedule_time").All(&result)
+	err := coll.Find(nil).All(&result)
 	if err != nil {
 		log.Println("Find EventToExecute failed !" + err.Error())
 		return result, err

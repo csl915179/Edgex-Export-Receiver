@@ -23,6 +23,11 @@ Password = "su"
 
 #接收调度结果
 [Schedule]
+[Schedule.AppSchedule]
+Host = "10.103.240.58"
+Port = 1210
+Path = "api/v1/scheduleresult"
+[Schedule.GetSchedule]
 Host = "10.103.240.39"
 Port = 8888
-getSchedule = "getSchedule"
+Path = "getSchedule"

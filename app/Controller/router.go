@@ -41,6 +41,12 @@ func InitRestRoutes() http.Handler {
 	s.HandleFunc("/application", ApplicationAndTask.AddApplication).Methods(http.MethodPost)
 	s.HandleFunc("/application", ApplicationAndTask.EditApplication).Methods(http.MethodPut)
 
+	//ScheduleResult相关
+	s.HandleFunc("/scheduleresult", ApplicationAndTask.ListScheduleResult).Methods(http.MethodGet)
+	s.HandleFunc("/scheduleresult/{number}", ApplicationAndTask.ListScheduleResultByNumber).Methods(http.MethodGet)
+	s.HandleFunc("/scheduleresult", ApplicationAndTask.ReceiveScheduleResult).Methods(http.MethodPost)
+
+
 	//Event相关
 	//查询最近的几条被发去调度的Event
 	s.HandleFunc("/event/event/{number}", ApplicationAndTask.FindEventByNumber).Methods(http.MethodGet)

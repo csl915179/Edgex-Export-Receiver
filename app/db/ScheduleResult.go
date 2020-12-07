@@ -7,6 +7,8 @@ import (
 
 type ScheduleResultRepos interface {
 	Select (id string) (domain.ScheduleResult, error)
+	SelectAll() ([]domain.ScheduleResult, error)
+	SelectNumber(number int64) ([]domain.ScheduleResult, error)
 	Insert (scheduleResult *domain.ScheduleResult) (string, error)
 	Update (scheduleResult *domain.ScheduleResult) (domain.ScheduleResult,error)
 	Delete (id string) error

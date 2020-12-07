@@ -1,15 +1,72 @@
 package domain
 
 import (
-	contract "github.com/edgexfoundry/go-mod-core-contracts/models"
 	"gopkg.in/mgo.v2/bson"
+	"reflect"
 )
 
 type Event struct {
-	Id          	bson.ObjectId					`bson:"_id,omitempty" json:"id"`
-	Event 			contract.Event					`json:"event"`
-	ExecutePlace	string							`json:"execute_place"`
-	ExecuteTime		string							`json:"execute_time"`
-	ScheduleTime	string							`json:"schedule_time"`
-	Size			int64							`json:"size"`
+	Id          	bson.ObjectId						`bson:"_id,omitempty" json:"id"`
+	AppID			string								`json:"app_id"`
+	Type			string								`json:"type"`
+	Name        	string        						`json:"name"`
+	Frequency		int64								`json:"frequency"`
+	Description 	string        						`json:"desc"`
+	Devices			[]device							`json:"devices"`
+}
+
+type device struct {
+	Id				string							`json:"id"`
+	Name			string							`json:"name"`
+	AvailCpu		int64							`json:"avail_cpu"`
+	AvailMem		int64							`json:"avail_mem"`
+	AvailDisk		int64							`json:"avail_disk"`
+	AvailNetRate	int64							`json:"avail_net_rate"`
+	Tasks			[]devicetask					`json:"tasks"`
+}
+
+type devicetask struct {
+	Id				string				`json:"id"`
+	Name			string				`json:"name"`								//Task的的名称
+	Type			string				`json:"type"`								//GetOrPut
+	CPURequest		int64				`json:"cpu"`								//Command需要的CPU资源
+	MemoryRequest	int64				`json:"memory"`								//Command需要的内存资源
+	DiskRequest		int64				`json:"disk"`								//Command需要的磁盘资源
+	Size			int64				`json:"size"`
+	NetRate			int64				`json:"net_rate"`
+	TaskLabels		[]Attribute			`json:"task_labels"`						//Task(Pod)的标签
+	ExecLimit   	string       		`json:"exec_limit"`							//执行地点限制 Local/Remote/LocalOrRemote
+	TimeLimit		int64				`json:"time_limit"`							//完成时间限制，格式为数字+ms/s/min/h/d
+	EnergyLimit   	int64       		`json:"energy_limit"`						//执行地点限制 Local/Remote/LocalOrRemote
+}
+
+//把收到的application转换成Event
+func (event *Event) TranslateApplicationtoEvent(application Application) {
+	event.Id = bson.NewObjectId()
+	event.AppID = application.Id.Hex()
+	event.Type = application.Type
+	event.Name = application.Name
+	event.Frequency = application.Frequency
+	event.Description = application.Description
+	event.Devices = make([]device, 0)
+	for _,task := range application.DeviceTasks{
+		device := device{Id:task.DeviceId, Name:task.DeviceName}
+		device.Tasks = make([]devicetask, 0)
+		for _,t := range task.Tasks {
+			devicetask := devicetask{}
+			devicetask.Id = bson.NewObjectId().Hex()
+			devicetask.Name = t.Name
+			commandval := reflect.ValueOf(&t.Command).Elem()
+			commandtype := commandval.Type()
+			devicetaskval := reflect.ValueOf(&devicetask).Elem()
+			for i:=0; i< commandval.NumField(); i++ {
+				name := commandtype.Field(i).Name
+				if ok := devicetaskval.FieldByName(name).IsValid(); ok{
+					devicetaskval.FieldByName(name).Set(reflect.ValueOf(commandval.Field(i).Interface()))
+				}
+			}
+			device.Tasks = append(device.Tasks, devicetask)
+		}
+		event.Devices = append(event.Devices, device)
+	}
 }

@@ -57,3 +57,29 @@ func (ar *ScheduleResultMongoRepository) Delete (id string) error {
 	}
 	return nil
 }
+
+func (ar *ScheduleResultMongoRepository) SelectAll() ([]domain.ScheduleResult, error) {
+	ds := DS.DataStore()
+	defer ds.S.Close()
+	coll := ds.S.DB(database).C(scheduleResultScheme)
+	result := make([]domain.ScheduleResult, 0)
+	err := coll.Find(nil).All(&result)
+	if err != nil {
+		log.Println("Find All ScheduleResult failed !" + err.Error())
+		return result, err
+	}
+	return result, err
+}
+
+func (ar *ScheduleResultMongoRepository) SelectNumber(number int64) ([]domain.ScheduleResult, error) {
+	ds := DS.DataStore()
+	defer ds.S.Close()
+	coll := ds.S.DB(database).C(scheduleResultScheme)
+	result := make([]domain.ScheduleResult, 0)
+	err := coll.Find(nil).Sort("scheduled_time").All(&result)
+	if err != nil {
+		log.Println("Find All ScheduleResult failed !" + err.Error())
+		return result, err
+	}
+	return result[:number], nil
+}
