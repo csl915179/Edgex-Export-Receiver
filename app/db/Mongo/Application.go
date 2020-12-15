@@ -28,6 +28,7 @@ func (ar *ApplicationMongoRepository) Insert(application *domain.Application) (s
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(applicationScheme)
+	application.AutoEventState = true
 	err := coll.Insert(application)
 	if err != nil {
 		log.Println("Insert application failed !")

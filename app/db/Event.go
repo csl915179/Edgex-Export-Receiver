@@ -7,9 +7,10 @@ import (
 
 type EventRepos interface {
 	Select(id string) (domain.Event, error)
-	SelectNumber(number int64) ([]domain.Event, error)
+	SelectAll() ([]domain.Event, error)
+	SelectNumber(low,high int) ([]domain.Event, error)
 	Insert(event *domain.Event) (string, error)
-	ExtractAll()([]domain.Event, error)
+	Extract(id string) error
 }
 
 func GetEventRepos() EventRepos {

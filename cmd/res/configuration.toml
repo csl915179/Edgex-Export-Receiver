@@ -21,13 +21,17 @@ Password = "su"
   EventToExecute = "eventtoexecute"
   EventExecuted = "eventexecuted"
 
+#EdgexFoundry信息
+[Edgex]
+Gateway = "10.103.240.140"
+
 #接收调度结果
 [Schedule]
 [Schedule.AppSchedule]
-Host = "10.103.240.58"
-Port = 1210
-Path = "api/v1/scheduleresult"
+Host = "10.103.240.39"
+Port = 8892
+Path = "edgex/task"
 [Schedule.GetSchedule]
 Host = "10.103.240.39"
 Port = 8888
-Path = "getSchedule"
+Path = "api/v1/scheduleresult"

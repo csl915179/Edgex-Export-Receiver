@@ -1,6 +1,7 @@
 package ApplicationAndTask
 
 import (
+	"Edgex-Export_Receiver/app/ApplicationAndTask/Autoevent"
 	"Edgex-Export_Receiver/app/db"
 	"Edgex-Export_Receiver/app/domain"
 	"encoding/json"
@@ -57,6 +58,7 @@ func DeleteApplicationByID (w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
+	Autoevent.GetManager().StopForApp(id)
 }
 
 //增加某个Application
@@ -79,6 +81,7 @@ func AddApplication(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
+	Autoevent.GetManager().StartForApp(Application)
 	Applicationbody,_ := json.Marshal(Application)
 	log.Println(string(Applicationbody))
 	w.Write([]byte(Application.Id.Hex()))
@@ -100,6 +103,7 @@ func EditApplication(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
+	Autoevent.GetManager().ReStartForApp(Application)
 	Applicationbody,_ := json.Marshal(Application)
 	w.Write(Applicationbody)
 }

@@ -4,22 +4,21 @@ import (
 	"Edgex-Export_Receiver/app/domain"
 	"gopkg.in/mgo.v2/bson"
 	"log"
+	"time"
 )
 
 type EventToExecuteMongoRepository struct {
 }
 
 //将Event加入待执行列表
-func (ar *EventToExecuteMongoRepository) InsertIntoToExecute (eventList []domain.Event) error {
+func (ar *EventToExecuteMongoRepository) InsertIntoToExecute (event *domain.Event) error {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(eventtoexecuteScheme)
-	for i:=0; i<len(eventList); i++ {
-		//eventList[i].ScheduleTime = time.Now().Format("2006-01-02T15:04:05")
-		err := coll.Insert(eventList[i])
-		if err != nil {
-			log.Println("Insert event into EventToExecuteCollection Failed! ", err.Error())
-		}
+	event.Modified = time.Now()
+	err := coll.Insert(event)
+	if err != nil {
+		log.Println("Insert event into EventToExecuteCollection Failed! ", err.Error())
 	}
 	return nil
 }
@@ -72,17 +71,30 @@ func (ar *EventToExecuteMongoRepository) SelectAll() ([]domain.Event, error) {
 }
 
 //查询最近的几条Event
-func (ar *EventToExecuteMongoRepository) SelectNumber(number int64) ([]domain.Event, error) {
+func (ar *EventToExecuteMongoRepository) SelectNumber(low, high int) ([]domain.Event, error) {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(eventtoexecuteScheme)
+	count,_ := coll.Find(nil).Count()
+	if low>high {
+		low, high = high, low
+	}
+	if low<0 {
+		low = 0
+	}
+	if low >= count {
+		low = count
+	}
+	if high >= count {
+		high = count
+	}
 	result := make([]domain.Event, 0)
-	err := coll.Find(nil).All(&result)
+	err := coll.Find(nil).Sort("-modified").Skip(low).Limit(high-low).All(&result)
 	if err != nil {
-		log.Println("Find EventToExecute failed !" + err.Error())
+		log.Println("Find Events failed !" + err.Error())
 		return result, err
 	}
-	return result, err
+	return result, nil
 }
 
 //更新Event

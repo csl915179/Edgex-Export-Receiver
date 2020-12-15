@@ -3,6 +3,7 @@ package domain
 import (
 	"gopkg.in/mgo.v2/bson"
 	"reflect"
+	"time"
 )
 
 type Event struct {
@@ -12,6 +13,7 @@ type Event struct {
 	Name        	string        						`json:"name"`
 	Frequency		int64								`json:"frequency"`
 	Description 	string        						`json:"desc"`
+	Modified		time.Time							`json:"modified"`
 	Devices			[]device							`json:"devices"`
 }
 
@@ -36,8 +38,10 @@ type devicetask struct {
 	NetRate			int64				`json:"net_rate"`
 	TaskLabels		[]Attribute			`json:"task_labels"`						//Task(Pod)的标签
 	ExecLimit   	string       		`json:"exec_limit"`							//执行地点限制 Local/Remote/LocalOrRemote
-	TimeLimit		int64				`json:"time_limit"`							//完成时间限制，格式为数字+ms/s/min/h/d
-	EnergyLimit   	int64       		`json:"energy_limit"`						//执行地点限制 Local/Remote/LocalOrRemote
+	TimeLimit		int64				`json:"time_limit"`							//完成时间限制，单位为S
+	EnergyLimit   	int64       		`json:"energy_limit"`						//能耗限制
+	ExecPlace		int64				`json:"exec_place"`							//最后实际执行地点
+	ExecTime		int64				`json:"exec_time"`							//最后实际执行时间
 }
 
 //把收到的application转换成Event
@@ -48,6 +52,7 @@ func (event *Event) TranslateApplicationtoEvent(application Application) {
 	event.Name = application.Name
 	event.Frequency = application.Frequency
 	event.Description = application.Description
+	event.Modified = time.Now()
 	event.Devices = make([]device, 0)
 	for _,task := range application.DeviceTasks{
 		device := device{Id:task.DeviceId, Name:task.DeviceName}

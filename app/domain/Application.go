@@ -8,6 +8,7 @@ type Application struct {
 	Name        	string        						`json:"name"`
 	Frequency		int64								`json:"frequency"`
 	Description 	string        						`json:"desc"`
+	AutoEventState	bool								`json:"auto_event_state"`	//Autoevent此时是否正常有效
 	DeviceTasks		map[string]DeviceTask				`json:"devicetasks"`
 }
 

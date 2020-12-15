@@ -11,9 +11,11 @@ func InitRestRoutes() http.Handler {
 	r := mux.NewRouter()
 	s := r.PathPrefix("/api/v1").Subrouter()
 
+	//PING
+	s.HandleFunc("/ping", Ping).Methods(http.MethodGet)
+
 	//收发相关
 	s.HandleFunc("/push", EdgexData.Receive).Methods(http.MethodPost)
-	s.HandleFunc("/pull", EdgexData.Pull).Methods(http.MethodGet)
 
 
 	//Device相关
@@ -43,15 +45,25 @@ func InitRestRoutes() http.Handler {
 
 	//ScheduleResult相关
 	s.HandleFunc("/scheduleresult", ApplicationAndTask.ListScheduleResult).Methods(http.MethodGet)
-	s.HandleFunc("/scheduleresult/{number}", ApplicationAndTask.ListScheduleResultByNumber).Methods(http.MethodGet)
+	s.HandleFunc("/scheduleresult/{low}/{high}", ApplicationAndTask.ListScheduleResultByNumber).Methods(http.MethodGet)
 	s.HandleFunc("/scheduleresult", ApplicationAndTask.ReceiveScheduleResult).Methods(http.MethodPost)
 
 
 	//Event相关
 	//查询最近的几条被发去调度的Event
-	s.HandleFunc("/event/event/{number}", ApplicationAndTask.FindEventByNumber).Methods(http.MethodGet)
-	s.HandleFunc("/event/eventtoexecute/{number}", ApplicationAndTask.FindEventToExecuteByNumber).Methods(http.MethodGet)
-	s.HandleFunc("/event/eventexecuted/{number}", ApplicationAndTask.FindEventExecutedByNumber).Methods(http.MethodGet)
+	s.HandleFunc("/event/event/{low}/{high}", ApplicationAndTask.FindEventByNumber).Methods(http.MethodGet)
+	s.HandleFunc("/event/eventtoexecute/{low}/{high}", ApplicationAndTask.FindEventToExecuteByNumber).Methods(http.MethodGet)
+	s.HandleFunc("/event/eventexecuted/{low}/{high}", ApplicationAndTask.FindEventExecutedByNumber).Methods(http.MethodGet)
+	s.HandleFunc("/event/event", ApplicationAndTask.FindEvent).Methods(http.MethodGet)
+	s.HandleFunc("/event/eventtoexecute", ApplicationAndTask.FindEventToExecute).Methods(http.MethodGet)
+	s.HandleFunc("/event/eventexecuted", ApplicationAndTask.FindEventExecuted).Methods(http.MethodGet)
 
 	return r
+}
+
+func Ping (w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	w.Header().Set("Content-Type", "application/json")
+
+	w.Write([]byte("Pong"))
 }

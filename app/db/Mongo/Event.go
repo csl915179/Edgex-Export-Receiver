@@ -9,17 +9,30 @@ import (
 type EventMongoRepository struct {
 }
 
-func (ar *EventMongoRepository) SelectNumber(number int64) ([]domain.Event, error) {
+func (ar *EventMongoRepository) SelectNumber(low,high int) ([]domain.Event, error) {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(eventScheme)
+	count,_ := coll.Find(nil).Count()
+	if low>high {
+		low, high = high, low
+	}
+	if low<0 {
+		low = 0
+	}
+	if low >= count {
+		low = count
+	}
+	if high >= count {
+		high = count
+	}
 	result := make([]domain.Event, 0)
-	err := coll.Find(nil).Sort().All(&result)
+	err := coll.Find(nil).Sort("-modified").Skip(low).Limit(high-low).All(&result)
 	if err != nil {
-		log.Println("Find Event failed !" + err.Error())
+		log.Println("Find Events failed !" + err.Error())
 		return result, err
 	}
-	return result, err
+	return result, nil
 }
 
 func (ar *EventMongoRepository) Select(id string) (domain.Event, error){
@@ -42,6 +55,19 @@ func (ar *EventMongoRepository) Select(id string) (domain.Event, error){
 	return result, nil
 }
 
+func (ar *EventMongoRepository) SelectAll() ([]domain.Event, error) {
+	ds := DS.DataStore()
+	defer ds.S.Close()
+	coll := ds.S.DB(database).C(eventScheme)
+	result := make([]domain.Event, 0)
+	err := coll.Find(nil).Sort("-executetime").All(&result)
+	if err != nil {
+		log.Println("Find All Event failed !" + err.Error())
+		return result, err
+	}
+	return result, err
+}
+
 func (ar *EventMongoRepository) Insert(event *domain.Event) (string, error) {
 	ds := DS.DataStore()
 	defer ds.S.Close()
@@ -54,27 +80,26 @@ func (ar *EventMongoRepository) Insert(event *domain.Event) (string, error) {
 	return event.Id.Hex(), nil
 }
 
-func (ar *EventMongoRepository) ExtractAll() ([]domain.Event, error) {
+func (ar *EventMongoRepository) Extract(id string) error {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(eventScheme)
-	result := make([]domain.Event, 0)
-	err := coll.Find(nil).All(&result)
+	result := domain.Event{}
+	err := coll.Find(bson.M{"_id": bson.ObjectIdHex(id)}).One(&result)
 	if err != nil {
-		log.Println("Find all event failed !")
-		return result, err
+		log.Println(err.Error())
+		return err
 	}
-	for i:=0; i<len(result); i++ {
-		for  j:=0; j<len(result[i].Devices); j++ {
-			coll := ds.S.DB(database).C(deviceScheme)
-			PhysicalDevice := domain.Device{}
-			coll.Find(bson.M{"_id": bson.ObjectIdHex(result[i].Devices[j].Id)}).One(&PhysicalDevice)
-			result[i].Devices[j].AvailCpu = PhysicalDevice.Cpu - PhysicalDevice.CPUUsed
-			result[i].Devices[j].AvailMem = PhysicalDevice.Memory - PhysicalDevice.MemoryUsed
-			result[i].Devices[j].AvailDisk = PhysicalDevice.Disk - PhysicalDevice.DiskUsed
-			result[i].Devices[j].AvailNetRate = PhysicalDevice.NetRate - PhysicalDevice.NetRateUsed
-		}
+	err = coll.Remove(bson.M{"_id": bson.ObjectIdHex(id)})
+	if err != nil {
+		log.Println(err.Error())
+		return err
 	}
-	coll.RemoveAll(nil)
-	return result, nil
+	coll = ds.S.DB(database).C(eventtoexecuteScheme)
+	err = coll.Insert(result)
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+	return nil
 }

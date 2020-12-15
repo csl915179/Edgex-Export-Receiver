@@ -16,12 +16,14 @@ var (
 	ServerConf   Service
 	DBConf       Database
 	ScheduleConf Schedule
+	EdgexConf	 Edgex
 )
 
 type config struct {
 	Server 		Service      `toml:"Service"`
 	DB     		Database     `toml:"Database"`
 	Schedule	Schedule	 `toml:"Schedule"`
+	Edgex		Edgex		 `toml:"Edgex"`
 }
 
 type Service struct {
@@ -63,6 +65,10 @@ type Schedule struct {
 	AppSchedule Scheduleelement
 }
 
+type Edgex struct {
+	Gateway		string
+}
+
 
 func LoadConfig(confFilePath string) error {
 	if len(confFilePath) == 0 {
@@ -83,5 +89,6 @@ func LoadConfig(confFilePath string) error {
 	ServerConf = conf.Server
 	DBConf = conf.DB
 	ScheduleConf = conf.Schedule
+	EdgexConf = conf.Edgex
 	return nil
 }

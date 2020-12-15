@@ -8,7 +8,7 @@ import (
 type EventExecuted interface {
 	InsertIntoExecuted (event *domain.Event) error
 	SelectAll() ([]domain.Event, error)
-	SelectNumber(number int64) ([]domain.Event, error)
+	SelectNumber(low, high int) ([]domain.Event, error)
 }
 
 func GetEventExecutedRepos() EventExecuted {

@@ -28,7 +28,7 @@ func (ar *ScheduleResultMongoRepository) Insert(scheduleResult *domain.ScheduleR
 	coll := ds.S.DB(database).C(scheduleResultScheme)
 	err := coll.Insert(scheduleResult)
 	if err != nil {
-		//log.Println("Insert ScheduleResult failed !" + err.Error())
+		log.Println("Insert ScheduleResult failed !" + err.Error())
 		return "", err
 	}
 	return scheduleResult.Id.Hex(), nil
@@ -63,7 +63,7 @@ func (ar *ScheduleResultMongoRepository) SelectAll() ([]domain.ScheduleResult, e
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(scheduleResultScheme)
 	result := make([]domain.ScheduleResult, 0)
-	err := coll.Find(nil).All(&result)
+	err := coll.Find(nil).Sort("-shceduledtime").All(&result)
 	if err != nil {
 		log.Println("Find All ScheduleResult failed !" + err.Error())
 		return result, err
@@ -71,15 +71,28 @@ func (ar *ScheduleResultMongoRepository) SelectAll() ([]domain.ScheduleResult, e
 	return result, err
 }
 
-func (ar *ScheduleResultMongoRepository) SelectNumber(number int64) ([]domain.ScheduleResult, error) {
+func (ar *ScheduleResultMongoRepository) SelectNumber(low,high int) ([]domain.ScheduleResult, error) {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(scheduleResultScheme)
+	count,_ := coll.Find(nil).Count()
+	if low>high {
+		low, high = high, low
+	}
+	if low<0 {
+		low = 0
+	}
+	if low >= count {
+		low = count
+	}
+	if high >= count {
+		high = count
+	}
 	result := make([]domain.ScheduleResult, 0)
-	err := coll.Find(nil).Sort("scheduled_time").All(&result)
+	err := coll.Find(nil).Sort("-shceduledtime").Skip(low).Limit(high-low).All(&result)
 	if err != nil {
-		log.Println("Find All ScheduleResult failed !" + err.Error())
+		log.Println("Find ScheduleResults failed !" + err.Error())
 		return result, err
 	}
-	return result[:number], nil
+	return result, nil
 }
