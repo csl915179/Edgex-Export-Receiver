@@ -1,6 +1,7 @@
 package EdgexData
 
 import (
+	"Edgex-Export_Receiver/app/ApplicationAndTask/Execute"
 	"Edgex-Export_Receiver/app/db"
 	"Edgex-Export_Receiver/app/domain"
 	"encoding/json"
@@ -47,6 +48,7 @@ func AddDevice(w http.ResponseWriter, r *http.Request) {
 	}
 	devicebody,_ := json.Marshal(Device)
 	log.Println(string(devicebody))
+	Execute.GetDeviceManager().AddDevice(Device)
 	w.Write([]byte(Device.Id.Hex()))
 }
 
@@ -83,6 +85,7 @@ func DeleteDevice (w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
+	Execute.GetDeviceManager().RemoveDevice(id)
 	w.Write([]byte("OK"))
 }
 
@@ -178,5 +181,6 @@ func CheckDeviceExist(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	result, _ := json.Marshal(&DeviceList)
+	Execute.GetDeviceManager().ReloadDevices()
 	w.Write(result)
 }

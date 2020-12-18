@@ -2,6 +2,7 @@ package Mongo
 
 import (
 	"Edgex-Export_Receiver/app/domain"
+	"gopkg.in/mgo.v2/bson"
 	"log"
 	"time"
 )
@@ -13,6 +14,8 @@ func (ar *EventExecutedMongoRepository) InsertIntoExecuted (event *domain.Event)
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(eventexecutedSchene)
+	coll.Remove(bson.M{"_id": event.Id})
+	coll = ds.S.DB(database).C(eventexecutedSchene)
 	event.Modified = time.Now()
 	err := coll.Insert(event)
 	if err != nil {

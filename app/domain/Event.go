@@ -6,6 +6,12 @@ import (
 	"time"
 )
 
+type EventTaskExecResult string
+const (
+	OK 		EventTaskExecResult = "OK"
+	Fail 	EventTaskExecResult = "Fail"
+)
+
 type Event struct {
 	Id          	bson.ObjectId						`bson:"_id,omitempty" json:"id"`
 	AppID			string								`json:"app_id"`
@@ -28,20 +34,22 @@ type device struct {
 }
 
 type devicetask struct {
-	Id				string				`json:"id"`
-	Name			string				`json:"name"`								//Task的的名称
-	Type			string				`json:"type"`								//GetOrPut
-	CPURequest		int64				`json:"cpu"`								//Command需要的CPU资源
-	MemoryRequest	int64				`json:"memory"`								//Command需要的内存资源
-	DiskRequest		int64				`json:"disk"`								//Command需要的磁盘资源
-	Size			int64				`json:"size"`
-	NetRate			int64				`json:"net_rate"`
-	TaskLabels		[]Attribute			`json:"task_labels"`						//Task(Pod)的标签
-	ExecLimit   	string       		`json:"exec_limit"`							//执行地点限制 Local/Remote/LocalOrRemote
-	TimeLimit		int64				`json:"time_limit"`							//完成时间限制，单位为S
-	EnergyLimit   	int64       		`json:"energy_limit"`						//能耗限制
-	ExecPlace		int64				`json:"exec_place"`							//最后实际执行地点
-	ExecTime		int64				`json:"exec_time"`							//最后实际执行时间
+	Id					string					`json:"id"`
+	Name				string					`json:"name"`								//Task的的名称
+	Type				string					`json:"type"`								//GetOrPut
+	CPURequest			int64					`json:"cpu"`								//Command需要的CPU资源
+	MemoryRequest		int64					`json:"memory"`								//Command需要的内存资源
+	DiskRequest			int64					`json:"disk"`								//Command需要的磁盘资源
+	Size				int64					`json:"size"`
+	NetRate				int64					`json:"net_rate"`
+	TaskLabels			[]Attribute				`json:"task_labels"`						//Task(Pod)的标签
+	ExecLimit   		string       			`json:"exec_limit"`							//执行地点限制 Local/Remote/LocalOrRemote
+	TimeLimit			int64					`json:"time_limit"`							//完成时间限制，单位为S
+	EnergyLimit   		int64       			`json:"energy_limit"`						//能耗限制
+	ExecPlace			int64					`json:"exec_place"`							//最后实际执行地点
+	ExecTime			time.Time				`json:"exec_time"`							//最后实际执行时间
+	EnergyUsed 			int64					`json:"energy_used"`						//最后能耗
+	ExecResult 			EventTaskExecResult		`json:"exec_result"`						//执行结果
 }
 
 //把收到的application转换成Event

@@ -14,7 +14,7 @@ type Device struct {
 	NetRate			int64					`json:"net_rate"`								//device的网络速率
 	GetCommands		map[string]*Command		`json:"getcommands"`							//device的command,get
 	PutCommands		map[string]*Command		`json:"putcommands"`							//device的command,put
-	CPUUsed			int64					`json:"cpu_used"`								//已经使用的CPU
+	CpuUsed			int64					`json:"cpu_used"`								//已经使用的CPU
 	MemoryUsed		int64					`json:"memory_used"`							//已经使用的内存
 	DiskUsed		int64					`json:"disk_used"`								//已经使用的硬盘
 	NetRateUsed		int64					`json:"net_rate_used"`							//已经使用的网络速率
@@ -33,9 +33,9 @@ type Command struct {
 	CPURequest		int64				`json:"cpu"`								//Command需要的CPU资源
 	MemoryRequest	int64				`json:"memory"`								//Command需要的内存资源
 	DiskRequest		int64				`json:"disk"`								//Command需要的磁盘资源
-	Size			int64				`json:"size"`
+	Size			int64				`json:"size"`								//Command需要的带宽
 	TaskLabels		[]Attribute			`json:"task_labels"`						//Task(Pod)的标签
 	ExecLimit   	string       		`json:"exec_limit"`							//执行地点限制 Local/Remote/LocalOrRemote
-	TimeLimit		int64				`json:"time_limit"`							//完成时间限制，格式为数字+ms/s/min/h/d
+	TimeLimit		int64				`json:"time_limit"`							//完成时间限制，单位为s
 	EnergyLimit   	int64       		`json:"energy_limit"`						//执行地点限制 Local/Remote/LocalOrRemote
 }

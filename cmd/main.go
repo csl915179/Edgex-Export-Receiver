@@ -2,6 +2,7 @@ package main
 
 import (
 	"Edgex-Export_Receiver/app/ApplicationAndTask/Autoevent"
+	"Edgex-Export_Receiver/app/ApplicationAndTask/Execute"
 	"Edgex-Export_Receiver/app/Controller"
 	"Edgex-Export_Receiver/app/config"
 	"Edgex-Export_Receiver/app/db/Mongo"
@@ -35,6 +36,7 @@ func main() {
 	}
 
 	Autoevent.GetManager().StartAutoEvents()
+	Execute.GetDeviceManager().LoadAllDevice()
 
 	log.Println("Edgex-Export-Receiver Listen At " + server.Addr)
 	log.Fatal(server.ListenAndServe())

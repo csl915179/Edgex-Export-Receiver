@@ -47,7 +47,7 @@ func (ar *EventMongoRepository) Select(id string) (domain.Event, error){
 		coll := ds.S.DB(database).C(deviceScheme)
 		PhysicalDevice := domain.Device{}
 		coll.Find(bson.M{"_id": bson.ObjectIdHex(result.Devices[i].Id)}).One(&PhysicalDevice)
-		result.Devices[i].AvailCpu = PhysicalDevice.Cpu - PhysicalDevice.CPUUsed
+		result.Devices[i].AvailCpu = PhysicalDevice.Cpu - PhysicalDevice.CpuUsed
 		result.Devices[i].AvailMem = PhysicalDevice.Memory - PhysicalDevice.MemoryUsed
 		result.Devices[i].AvailDisk = PhysicalDevice.Disk - PhysicalDevice.DiskUsed
 		result.Devices[i].AvailNetRate = PhysicalDevice.NetRate - PhysicalDevice.NetRateUsed

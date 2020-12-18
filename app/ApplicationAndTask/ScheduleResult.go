@@ -1,6 +1,7 @@
 package ApplicationAndTask
 
 import (
+	"Edgex-Export_Receiver/app/ApplicationAndTask/Execute"
 	"Edgex-Export_Receiver/app/db"
 	"Edgex-Export_Receiver/app/domain"
 	"encoding/json"
@@ -79,6 +80,8 @@ func ReceiveScheduleResult (w http.ResponseWriter, r *http.Request) {
 
 	db.GetScheduleResultRepos().Insert(&ScheduleResult)
 	db.GetEventRepos().Extract(ScheduleResult.Id.Hex())
+	go Execute.GetEventExecutemanager().ExecuteEvent(ScheduleResult.Id.Hex())
 	w.Write([]byte("OK"))
+
 	log.Println("Get Schedule Result: ",ScheduleResult)
 }
