@@ -23,15 +23,15 @@ Password = "su"
 
 #EdgexFoundry信息
 [Edgex]
-Gateway = "10.103.240.140"
+Gateway = "10.112.170.132"
 
 #接收调度结果
 [Schedule]
 [Schedule.AppSchedule]
-Host = "10.103.240.39"
+Host = "10.112.157.203"
 Port = 8892
 Path = "edgex/task"
 [Schedule.GetSchedule]
-Host = "10.103.240.39"
+Host = "10.112.157.203"
 Port = 8888
 Path = "api/v1/scheduleresult"

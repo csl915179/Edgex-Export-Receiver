@@ -10,16 +10,16 @@ import (
 type EventExecutedMongoRepository struct {
 }
 
-func (ar *EventExecutedMongoRepository) InsertIntoExecuted (event *domain.Event) error {
+func (ar *EventExecutedMongoRepository) InsertIntoExecuted(event *domain.Event) error {
 	ds := DS.DataStore()
 	defer ds.S.Close()
-	coll := ds.S.DB(database).C(eventexecutedSchene)
+	coll := ds.S.DB(database).C(eventtoexecuteScheme)
 	coll.Remove(bson.M{"_id": event.Id})
 	coll = ds.S.DB(database).C(eventexecutedSchene)
 	event.Modified = time.Now()
 	err := coll.Insert(event)
 	if err != nil {
-		//log.Println("Insert event into EventExecuted failed !")
+		log.Println("Insert event into EventExecuted failed !")
 		return err
 	}
 	return nil
@@ -29,7 +29,7 @@ func (ar *EventExecutedMongoRepository) InsertIntoExecuted (event *domain.Event)
 func (ar *EventExecutedMongoRepository) SelectAll() ([]domain.Event, error) {
 	ds := DS.DataStore()
 	defer ds.S.Close()
-	coll := ds.S.DB(database).C(eventtoexecuteScheme)
+	coll := ds.S.DB(database).C(eventexecutedSchene)
 	result := make([]domain.Event, 0)
 	err := coll.Find(nil).Sort("executetime").All(&result)
 	if err != nil {
@@ -44,11 +44,11 @@ func (ar *EventExecutedMongoRepository) SelectNumber(low, high int) ([]domain.Ev
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(eventexecutedSchene)
-	count,_ := coll.Find(nil).Count()
-	if low>high {
+	count, _ := coll.Find(nil).Count()
+	if low > high {
 		low, high = high, low
 	}
-	if low<0 {
+	if low < 0 {
 		low = 0
 	}
 	if low >= count {
@@ -58,7 +58,7 @@ func (ar *EventExecutedMongoRepository) SelectNumber(low, high int) ([]domain.Ev
 		high = count
 	}
 	result := make([]domain.Event, 0)
-	err := coll.Find(nil).Sort("-modified").Skip(low).Limit(high-low).All(&result)
+	err := coll.Find(nil).Sort("-modified").Skip(low).Limit(high - low).All(&result)
 	if err != nil {
 		log.Println("Find Events failed !" + err.Error())
 		return result, err
