@@ -17,7 +17,6 @@ func InitRestRoutes() http.Handler {
 	//收发相关
 	s.HandleFunc("/push", EdgexData.Receive).Methods(http.MethodPost)
 
-
 	//Device相关
 	//列出Device
 	s.HandleFunc("/device", EdgexData.ListAllDevice).Methods(http.MethodGet)
@@ -35,6 +34,8 @@ func InitRestRoutes() http.Handler {
 	s.HandleFunc("/device/edgexid/{edgexid}", EdgexData.DeleteDeviceByEdgexId).Methods(http.MethodDelete)
 	//整理僵尸Device并列出结果
 	s.HandleFunc("/device/check", EdgexData.CheckDeviceExist).Methods(http.MethodPost)
+	//按名查看设备已使用的资源
+	s.HandleFunc("/device/resourceused/name/{name}", EdgexData.FindDeviceResourceUsedByName).Methods(http.MethodGet)
 
 	//Application相关
 	s.HandleFunc("/application", ApplicationAndTask.ListAllApplication).Methods(http.MethodGet)
@@ -48,7 +49,6 @@ func InitRestRoutes() http.Handler {
 	s.HandleFunc("/scheduleresult/{low}/{high}", ApplicationAndTask.ListScheduleResultByNumber).Methods(http.MethodGet)
 	s.HandleFunc("/scheduleresult", ApplicationAndTask.ReceiveScheduleResult).Methods(http.MethodPost)
 
-
 	//Event相关
 	//查询最近的几条被发去调度的Event
 	s.HandleFunc("/event/event/{low}/{high}", ApplicationAndTask.FindEventByNumber).Methods(http.MethodGet)
@@ -58,10 +58,13 @@ func InitRestRoutes() http.Handler {
 	s.HandleFunc("/event/eventtoexecute", ApplicationAndTask.FindEventToExecute).Methods(http.MethodGet)
 	s.HandleFunc("/event/eventexecuted", ApplicationAndTask.FindEventExecuted).Methods(http.MethodGet)
 
+	s1 := r.PathPrefix("").Subrouter()
+	s1.HandleFunc("/ws", WebSocketHandler)
+
 	return r
 }
 
-func Ping (w http.ResponseWriter, r *http.Request) {
+func Ping(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
 

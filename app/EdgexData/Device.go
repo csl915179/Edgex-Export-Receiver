@@ -13,7 +13,7 @@ import (
 )
 
 //列出所有的device
-func ListAllDevice(w http.ResponseWriter, r *http.Request){
+func ListAllDevice(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
 	DeviceList, err := db.GetDeviceRepos().SelectAll()
@@ -37,16 +37,16 @@ func AddDevice(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	if Device.Id.Hex() == ""{
+	if Device.Id.Hex() == "" {
 		Device.Id = bson.NewObjectId()
 	}
 
-	if _,err := db.GetDeviceRepos().Insert(&Device); err != nil {
+	if _, err := db.GetDeviceRepos().Insert(&Device); err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	devicebody,_ := json.Marshal(Device)
+	devicebody, _ := json.Marshal(Device)
 	log.Println(string(devicebody))
 	Execute.GetDeviceManager().AddDevice(Device)
 	w.Write([]byte(Device.Id.Hex()))
@@ -63,18 +63,18 @@ func EditDevice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Device,err := db.GetDeviceRepos().Update(&Device)
+	Device, err := db.GetDeviceRepos().Update(&Device)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	result,_ := json.Marshal(Device)
+	result, _ := json.Marshal(Device)
 	w.Write(result)
 }
 
 //删除Device
-func DeleteDevice (w http.ResponseWriter, r *http.Request) {
+func DeleteDevice(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -90,7 +90,7 @@ func DeleteDevice (w http.ResponseWriter, r *http.Request) {
 }
 
 //按EdgexID删除Device
-func DeleteDeviceByEdgexId (w http.ResponseWriter, r *http.Request) {
+func DeleteDeviceByEdgexId(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -105,13 +105,13 @@ func DeleteDeviceByEdgexId (w http.ResponseWriter, r *http.Request) {
 }
 
 //按名称查找device
-func FindDeviceByName (w http.ResponseWriter, r *http.Request) {
+func FindDeviceByName(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	name := vars["name"]
 
-	device,err := db.GetDeviceRepos().SelectByName(name)
+	device, err := db.GetDeviceRepos().SelectByName(name)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
@@ -122,13 +122,13 @@ func FindDeviceByName (w http.ResponseWriter, r *http.Request) {
 }
 
 //按EdgexID查找Device
-func FindDeviceByEdgexId (w http.ResponseWriter, r *http.Request) {
+func FindDeviceByEdgexId(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	edgexid := vars["edgexid"]
 
-	device,err := db.GetDeviceRepos().SelectByEdgexId(edgexid)
+	device, err := db.GetDeviceRepos().SelectByEdgexId(edgexid)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
@@ -152,20 +152,20 @@ func CheckDeviceExist(w http.ResponseWriter, r *http.Request) {
 	//找出当前Mongo里面所有的device信息
 	Existed := make(map[string]bool, 0)
 	mongoDeviceList, err := db.GetDeviceRepos().SelectAll()
-	if err != nil{
+	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	for i:=0; i<len(mongoDeviceList); i++ {
+	for i := 0; i < len(mongoDeviceList); i++ {
 		Existed[mongoDeviceList[i].EdgexId] = false
 	}
 	//比对
-	for i:=0; i<len(ReceivedDeviceList); i++ {
+	for i := 0; i < len(ReceivedDeviceList); i++ {
 		Existed[ReceivedDeviceList[i].Id] = true
 	}
-	for EdgexdeviceId := range(Existed){
-		if Existed[EdgexdeviceId] == false{
+	for EdgexdeviceId := range Existed {
+		if Existed[EdgexdeviceId] == false {
 			err = db.GetDeviceRepos().DeleteByEdgexId(EdgexdeviceId)
 			if err != nil {
 				log.Println(err.Error())
@@ -182,5 +182,29 @@ func CheckDeviceExist(w http.ResponseWriter, r *http.Request) {
 	}
 	result, _ := json.Marshal(&DeviceList)
 	Execute.GetDeviceManager().ReloadDevices()
+	w.Write(result)
+}
+
+//按名查看设备已使用的资源
+func FindDeviceResourceUsedByName(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	name := vars["name"]
+
+	device, err := db.GetDeviceRepos().SelectByName(name)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
+	}
+	type deviceResourceUsed struct {
+		CpuUsed     int64 `json:"cpu_used"`      //已经使用的CPU
+		MemoryUsed  int64 `json:"memory_used"`   //已经使用的内存
+		DiskUsed    int64 `json:"disk_used"`     //已经使用的硬盘
+		NetRateUsed int64 `json:"net_rate_used"` //已经使用的网络速率
+	}
+	result, _ := json.Marshal(&deviceResourceUsed{CpuUsed: device.CpuUsed,
+		MemoryUsed: device.MemoryUsed, DiskUsed: device.DiskUsed, NetRateUsed: device.NetRateUsed})
 	w.Write(result)
 }

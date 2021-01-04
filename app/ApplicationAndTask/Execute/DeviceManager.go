@@ -113,14 +113,6 @@ func (m *devicemanager) ExecuteTasks(deviceid string, tasks []*TaskExecuteUnit) 
 	deviceManagerVars.mutex.Unlock()
 }
 
-//初始化DeviceManager
-func GetDeviceManager() DeviceManager {
-	deviceManagerVars.createOnce.Do(func() {
-		deviceManagerVars.m = &devicemanager{deviceMap: make(map[string]deviceManage, 0)}
-	})
-	return deviceManagerVars.m
-}
-
 //为某个设备分配任务
 //排序相关功能
 type Pair struct {
@@ -209,4 +201,12 @@ func (m *devicemanager) allocateTasksForDevice(deviceid string) {
 			continue
 		}
 	}
+}
+
+//初始化DeviceManager
+func GetDeviceManager() DeviceManager {
+	deviceManagerVars.createOnce.Do(func() {
+		deviceManagerVars.m = &devicemanager{deviceMap: make(map[string]deviceManage, 0)}
+	})
+	return deviceManagerVars.m
 }

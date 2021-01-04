@@ -28,10 +28,10 @@ Gateway = "10.112.170.132"
 #接收调度结果
 [Schedule]
 [Schedule.AppSchedule]
-Host = "10.112.157.203"
-Port = 8892
+Host = "10.112.221.88"
+Port = 8082
 Path = "edgex/task"
 [Schedule.GetSchedule]
-Host = "10.112.157.203"
+Host = "10.112.221.88"
 Port = 8888
 Path = "api/v1/scheduleresult"

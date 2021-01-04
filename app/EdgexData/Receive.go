@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"gopkg.in/mgo.v2/bson"
 	"log"
+	"math/rand"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -59,19 +60,16 @@ func TranslateApplicationtoEvent(application domain.Application) (domain.Event, 
 	event.Description = application.Description
 	event.Modified = time.Now()
 	event.Devices = make([]domain.Eventdevice, 0)
-	for _, task := range application.DeviceTasks {
-		deviceInfo, err := db.GetDeviceRepos().Select(task.DeviceId)
+	for _, devicetask := range application.DeviceTasks {
+		deviceInfo, err := db.GetDeviceRepos().Select(devicetask.DeviceId)
 		if err != nil {
 			log.Println(err.Error())
 			return event, err
 		}
-		device := domain.Eventdevice{Id: task.DeviceId, Name: task.DeviceName, AvailCpu: deviceInfo.Cpu - deviceInfo.CpuUsed,
+		device := domain.Eventdevice{Id: devicetask.DeviceId, Name: devicetask.DeviceName, AvailCpu: deviceInfo.Cpu - deviceInfo.CpuUsed,
 			AvailMem: deviceInfo.Memory - deviceInfo.MemoryUsed, AvailDisk: deviceInfo.Disk - deviceInfo.DiskUsed, AvailNetRate: deviceInfo.NetRate - deviceInfo.NetRateUsed}
 		device.Tasks = make([]domain.Eventdevicetask, 0)
-		for _, t := range task.Tasks {
-			devicetask := domain.Eventdevicetask{}
-			devicetask.Id = bson.NewObjectId().Hex()
-			devicetask.Name = t.Name
+		for _, t := range devicetask.Tasks {
 			commandval := reflect.ValueOf(&t.Command).Elem()
 			commandtype := commandval.Type()
 			devicetaskval := reflect.ValueOf(&devicetask).Elem()
@@ -81,6 +79,18 @@ func TranslateApplicationtoEvent(application domain.Application) (domain.Event, 
 					devicetaskval.FieldByName(name).Set(reflect.ValueOf(commandval.Field(i).Interface()))
 				}
 			}
+			devicetask := domain.Eventdevicetask{}
+			devicetask.Id = bson.NewObjectId().Hex()
+			devicetask.Name = t.Name
+
+			//增加随机数
+			devicetask.CPURequest += rand.Int63n((5))
+			devicetask.MemoryRequest += rand.Int63n((5))
+			devicetask.DiskRequest += rand.Int63n((5))
+			devicetask.NetRate += rand.Int63n(5)
+			devicetask.Size += rand.Int63n(5)
+			devicetask.TimeLimit += rand.Int63n(5)
+			devicetask.EnergyLimit += rand.Int63n(5)
 			device.Tasks = append(device.Tasks, devicetask)
 		}
 		event.Devices = append(event.Devices, device)

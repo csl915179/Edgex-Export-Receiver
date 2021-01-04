@@ -47,13 +47,13 @@ func (m *eventExecutemanager) ExecuteEvent(id string) {
 			eventExecute.m.execsMap[event.Id.Hex()].taskunits[taskunit.Id.Hex()] = taskunit
 			eventExecute.mutex.Unlock()
 			deviceTaskUnits = append(deviceTaskUnits, taskunit)
-			go GetDeviceManager().ExecuteTasks(device.DeviceId, deviceTaskUnits)
 		}
+		go GetDeviceManager().ExecuteTasks(device.DeviceId, deviceTaskUnits)
 	}
 	//监听，等待全部执行完毕，虽然可能会有执行失败的
 	flag := false
 	taskunitList := eventExecute.m.execsMap[event.Id.Hex()].taskunits
-	for !flag {
+	for flag == false {
 		flag = true
 		for _, task := range taskunitList {
 			if task.State != executed {
