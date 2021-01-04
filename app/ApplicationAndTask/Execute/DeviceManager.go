@@ -54,6 +54,10 @@ func (m *devicemanager) LoadAllDevice() {
 	deviceManagerVars.mutex.Lock()
 	for i := 0; i < len(deviceList); i++ {
 		deviceManagerVars.m.deviceMap[deviceList[i].Id.Hex()] = deviceManage{lock: new(sync.Mutex), taskList: make(map[string]*TaskExecuteUnit, 0)}
+		deviceList[i].NetRateUsed = 0
+		deviceList[i].CpuUsed = 0
+		deviceList[i].MemoryUsed = 0
+		db.GetDeviceRepos().Update(&deviceList[i])
 	}
 	deviceManagerVars.mutex.Unlock()
 }

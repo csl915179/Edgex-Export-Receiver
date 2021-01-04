@@ -70,6 +70,8 @@ func TranslateApplicationtoEvent(application domain.Application) (domain.Event, 
 			AvailMem: deviceInfo.Memory - deviceInfo.MemoryUsed, AvailDisk: deviceInfo.Disk - deviceInfo.DiskUsed, AvailNetRate: deviceInfo.NetRate - deviceInfo.NetRateUsed}
 		device.Tasks = make([]domain.Eventdevicetask, 0)
 		for _, t := range devicetask.Tasks {
+			devicetask := domain.Eventdevicetask{}
+			devicetask.Id = bson.NewObjectId().Hex()
 			commandval := reflect.ValueOf(&t.Command).Elem()
 			commandtype := commandval.Type()
 			devicetaskval := reflect.ValueOf(&devicetask).Elem()
@@ -79,8 +81,6 @@ func TranslateApplicationtoEvent(application domain.Application) (domain.Event, 
 					devicetaskval.FieldByName(name).Set(reflect.ValueOf(commandval.Field(i).Interface()))
 				}
 			}
-			devicetask := domain.Eventdevicetask{}
-			devicetask.Id = bson.NewObjectId().Hex()
 			devicetask.Name = t.Name
 
 			//增加随机数
