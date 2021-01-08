@@ -1,37 +1,37 @@
 [Service]
-Host = "localhost"
-Port = 1210
-Labels = []
-OpenMsg = "Edgex-Export-Receiver started"
+  Host = "localhost"
+  Port = 1210
+  Labels = []
+  OpenMsg = "Edgex-Export-Receiver started"
+  StaticResourcesPath = ""
 
-#Using an default memory db automatically if not configed here.
 [Database]
-Host = "localhost"
-Name = "edgex-export-receiver"
-Port = 27017
-Username = "su"
-Password = "su"
+  Host = "localhost"
+  Name = "edgex-export-receiver"
+  Port = 27017
+  Username = "su"
+  Password = "su"
+  Timeout = 0
+  Type = ""
   [Database.Scheme]
-  Event = "event"
-  Application = "application"
-  Node = "node"
-  TaskEvent = "taskevent"
-  Device = "device"
-  ScheduleResult = "scheduleresult"
-  EventToExecute = "eventtoexecute"
-  EventExecuted = "eventexecuted"
+    Event = "event"
+    Application = "application"
+    Node = "node"
+    TaskEvent = "taskevent"
+    Device = "device"
+    ScheduleResult = "scheduleresult"
+    EventToExecute = "eventtoexecute"
+    EventExecuted = "eventexecuted"
 
-#EdgexFoundry信息
 [Edgex]
-Gateway = "10.112.170.132"
+  Gateway = "10.112.170.132"
 
-#接收调度结果
 [Schedule]
-[Schedule.AppSchedule]
-Host = "10.112.221.88"
-Port = 8082
-Path = "edgex/task"
-[Schedule.GetSchedule]
-Host = "10.112.221.88"
-Port = 8888
-Path = "api/v1/scheduleresult"
+  [Schedule.GetSchedule]
+    Host = "10.112.221.88"
+    Port = 8888
+    Path = "api/v1/scheduleresult"
+  [Schedule.AppSchedule]
+    Host = "10.112.221.88"
+    Port = 8082
+    Path = "edgex/task"

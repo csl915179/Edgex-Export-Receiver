@@ -11,7 +11,7 @@ type DeviceMongoRepository struct {
 }
 
 //查找所有device
-func (ar *DeviceMongoRepository) SelectAll() ([]domain.Device, error){
+func (ar *DeviceMongoRepository) SelectAll() ([]domain.Device, error) {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(deviceScheme)
@@ -23,8 +23,9 @@ func (ar *DeviceMongoRepository) SelectAll() ([]domain.Device, error){
 	}
 	return result, err
 }
+
 //按ID查找Device
-func (ar *DeviceMongoRepository) Select(id string) (domain.Device, error){
+func (ar *DeviceMongoRepository) Select(id string) (domain.Device, error) {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(deviceScheme)
@@ -36,8 +37,9 @@ func (ar *DeviceMongoRepository) Select(id string) (domain.Device, error){
 	}
 	return result, nil
 }
+
 //按名查找Device
-func (ar *DeviceMongoRepository) SelectByName(name string) (domain.Device, error){
+func (ar *DeviceMongoRepository) SelectByName(name string) (domain.Device, error) {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(deviceScheme)
@@ -49,8 +51,9 @@ func (ar *DeviceMongoRepository) SelectByName(name string) (domain.Device, error
 	}
 	return result, nil
 }
+
 //按EdgexID查找Device
-func (ar *DeviceMongoRepository) SelectByEdgexId(edgexId string) (domain.Device, error){
+func (ar *DeviceMongoRepository) SelectByEdgexId(edgexId string) (domain.Device, error) {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(deviceScheme)
@@ -63,23 +66,23 @@ func (ar *DeviceMongoRepository) SelectByEdgexId(edgexId string) (domain.Device,
 	return result, nil
 }
 
-func (ar *DeviceMongoRepository) Insert(device *domain.Device) (string, error){
+func (ar *DeviceMongoRepository) Insert(device *domain.Device) (string, error) {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(deviceScheme)
-	if device.Id.Hex() == ""{
+	if device.Id.Hex() == "" {
 		device.Id = bson.NewObjectId()
 	}
-	for name,command := range device.GetCommands {
+	for name, command := range device.GetCommands {
 		device.GetCommands[name].Size = command.MemoryRequest
 	}
-	for name,command := range device.PutCommands {
+	for name, command := range device.PutCommands {
 		device.PutCommands[name].Size = command.MemoryRequest
 	}
 
 	//查找有无重名设备
-	count,_ := coll.Find(bson.M{"name": device.Name}).Count()
-	if count>0 {
+	count, _ := coll.Find(bson.M{"name": device.Name}).Count()
+	if count > 0 {
 		err := errors.New("duplicate device")
 		log.Println("Find Device failed !" + err.Error())
 		return "", err
@@ -93,7 +96,7 @@ func (ar *DeviceMongoRepository) Insert(device *domain.Device) (string, error){
 	return device.Id.Hex(), nil
 }
 
-func (ar *DeviceMongoRepository) Delete(id string) error{
+func (ar *DeviceMongoRepository) Delete(id string) error {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	//正片开始，删除device
@@ -106,7 +109,7 @@ func (ar *DeviceMongoRepository) Delete(id string) error{
 	return nil
 }
 
-func (ar *DeviceMongoRepository) Update(device *domain.Device) (domain.Device, error){
+func (ar *DeviceMongoRepository) Update(device *domain.Device) (domain.Device, error) {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(deviceScheme)
@@ -115,11 +118,21 @@ func (ar *DeviceMongoRepository) Update(device *domain.Device) (domain.Device, e
 		log.Println("Update Device failed !" + err.Error())
 		return *device, err
 	}
+	//同步更新用到这些设备的应用
+	coll = ds.S.DB(database).C(applicationScheme)
+	apps := make([]domain.Application, 0)
+	coll.Find(bson.M{("devicetasks." + device.Name): bson.M{"$exists": true}}).All(&apps)
+	for i := 0; i < len(apps); i++ {
+		for key, v := range apps[i].DeviceTasks[device.Name].Tasks {
+			apps[i].DeviceTasks[device.Name].Tasks[key] = domain.Task{Name: apps[i].DeviceTasks[device.Name].Tasks[key].Name, Command: *device.GetCommands[v.Command.Name]}
+		}
+		coll.UpdateId(apps[i].Id, &apps[i])
+	}
 	return *device, nil
 }
 
 //按照Edgex里的DeviceID删掉device
-func (ar *DeviceMongoRepository) DeleteByEdgexId(edgexId string) error{
+func (ar *DeviceMongoRepository) DeleteByEdgexId(edgexId string) error {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(deviceScheme)

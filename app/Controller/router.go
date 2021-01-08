@@ -3,6 +3,7 @@ package Controller
 import (
 	"Edgex-Export_Receiver/app/ApplicationAndTask"
 	"Edgex-Export_Receiver/app/EdgexData"
+	"Edgex-Export_Receiver/app/config"
 	mux "github.com/gorilla/mux"
 	"net/http"
 )
@@ -48,6 +49,8 @@ func InitRestRoutes() http.Handler {
 	s.HandleFunc("/scheduleresult", ApplicationAndTask.ListScheduleResult).Methods(http.MethodGet)
 	s.HandleFunc("/scheduleresult/{low}/{high}", ApplicationAndTask.ListScheduleResultByNumber).Methods(http.MethodGet)
 	s.HandleFunc("/scheduleresult", ApplicationAndTask.ReceiveScheduleResult).Methods(http.MethodPost)
+	s.HandleFunc("/scheduleresult/appschedule", config.ListAppSchedule).Methods(http.MethodGet)
+	s.HandleFunc("/scheduleresult/appschedule", config.ModifyAppSchedule).Methods(http.MethodPost)
 
 	//Event相关
 	//查询最近的几条被发去调度的Event

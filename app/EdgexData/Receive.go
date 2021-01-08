@@ -60,6 +60,8 @@ func TranslateApplicationtoEvent(application domain.Application) (domain.Event, 
 	event.Description = application.Description
 	event.Modified = time.Now()
 	event.Devices = make([]domain.Eventdevice, 0)
+	count := int32(0)
+	ran := int32(2) + rand.Int31n(int32(len(application.DeviceTasks)))
 	for _, devicetask := range application.DeviceTasks {
 		deviceInfo, err := db.GetDeviceRepos().Select(devicetask.DeviceId)
 		if err != nil {
@@ -70,6 +72,10 @@ func TranslateApplicationtoEvent(application domain.Application) (domain.Event, 
 			AvailMem: deviceInfo.Memory - deviceInfo.MemoryUsed, AvailDisk: deviceInfo.Disk - deviceInfo.DiskUsed, AvailNetRate: deviceInfo.NetRate - deviceInfo.NetRateUsed}
 		device.Tasks = make([]domain.Eventdevicetask, 0)
 		for _, t := range devicetask.Tasks {
+			count++
+			if count%ran == 0 {
+				continue
+			}
 			devicetask := domain.Eventdevicetask{}
 			devicetask.Id = bson.NewObjectId().Hex()
 			commandval := reflect.ValueOf(&t.Command).Elem()
@@ -82,7 +88,6 @@ func TranslateApplicationtoEvent(application domain.Application) (domain.Event, 
 				}
 			}
 			devicetask.Name = t.Name
-
 			//增加随机数
 			devicetask.CPURequest += rand.Int63n((5))
 			devicetask.MemoryRequest += rand.Int63n((5))
